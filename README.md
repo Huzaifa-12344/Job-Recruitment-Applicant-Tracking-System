@@ -1,39 +1,21 @@
 # Job Recruitment / Applicant Tracking System
-
-A secure applicant tracking system for **Nowshera Digital**.
-
+A responsive careers site and applicant tracking starter for **Nowshera Digital**. Candidates can discover roles, create an account, upload a private CV, and track applications. Recruiters see applications for their assigned jobs. Admins manage profiles/jobs and remove applications. Optional n8n email notifications are included.
+## What is included
+- React + TypeScript + Vite careers website with search, department filters, responsive layout, and preview mode.
+- Supabase Auth email/password flow and automatic candidate profiles.
+- Private CV bucket with file type/size restrictions and ownership/assigned-recruiter RLS.
+- Application submission, duplicate prevention, signed CV viewing, application status, and admin removal.
+- SQL schema, role setup, environment example, authentication/security documentation, testing checklist, and n8n workflow JSON.
+## Run it
+See [Setup and deployment](docs/SETUP.md). Fast start: configure `.env.local`, run SQL from `supabase/schema.sql`, then `npm install && npm run dev`.
 ## Roles
-
-- **Candidate** — signs up, uploads a CV, and can view only their own applications.
-- **Recruiter** — reviews applications only for jobs assigned to them.
-- **Admin** — manages jobs, recruiters, and candidate records.
-
-## Stack
-
-- React + TypeScript frontend
-- Supabase Auth, Postgres, and Storage
-- Server-side API / Edge Functions for privileged actions
-- n8n for email notifications and optional AI CV summaries
-
-## Authentication and security
-
-Email/password authentication is provided by Supabase Auth. The browser holds only the Supabase session; all authorization is enforced by database Row Level Security (RLS) and server-side checks.
-
-- Role is read from `profiles.role`, never trusted from the browser.
-- Candidate CVs are stored in a private bucket.
-- The AI/n8n automation key stays in server or n8n environment variables only.
-- No production secret, access token, password, or API key is committed.
-
-Read [Authentication documentation](docs/authentication.md) and the [database security policies](supabase/schema.sql).
-
-## Environment setup
-
-Copy `.env.example` to `.env.local` and set only public Supabase project values in the frontend. Configure service-role keys and automation secrets in a protected server/n8n environment, never in `.env.local` exposed to the browser.
-
-## Main request flow
-
-`Browser → Supabase Auth → access token → API/RLS → database & private CV storage`
-
-For notification work:
-
-`Server → n8n production webhook → email service`
+- **Candidate:** register, apply, access own applications and CVs.
+- **Recruiter:** read applications and CVs only for assigned jobs; update review status.
+- **Admin:** manage jobs and profiles; read/remove applications.
+Roles are never selected by the public signup form. The first admin is assigned by a trusted project owner in Supabase SQL Editor.
+## Security
+Browser bundle uses only Supabase URL and publishable/anon key. RLS enforces data access; CV bucket is private. Service-role keys, Gmail credentials and n8n shared secrets must stay in protected server/n8n secrets. Read [authentication architecture](docs/authentication.md).
+## Email automation
+Optional workflow: [n8n/application-notification.workflow.json](n8n/application-notification.workflow.json). Configure it by following the setup guide. No CV or file URL is sent to n8n.
+## Acceptance checklist
+See [manual checks](docs/TESTING.md). Real sign-in, uploads and end-to-end email require your own Supabase and n8n credentials, which are intentionally not included in this public repository.
