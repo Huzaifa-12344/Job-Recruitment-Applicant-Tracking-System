@@ -1,7 +1,7 @@
 {
   "name": "Nowshera ATS — Application Notification",
   "nodes": [
-    {"parameters":{"httpMethod":"POST","path":"ats-application-created","responseMode":"lastNode","options":{}},"id":"1","name":"Application Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[-500,0],"webhookId":"ats-application-created"},
+    {"parameters":{"httpMethod":"POST","path":"ats-application-created","responseMode":"responseNode","options":{}},"id":"1","name":"Application Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[-500,0],"webhookId":"ats-application-created"},
     {"parameters":{"conditions":{"string":[{"value1":"={{$json.headers[\"x-automation-key\"]}}","operation":"equals","value2":"={{$env.ATS_WEBHOOK_SECRET}}"}]}},"id":"2","name":"Verify shared secret","type":"n8n-nodes-base.if","typeVersion":2,"position":[-260,0]},
     {"parameters":{"fromEmail":"={{$env.RECRUITING_FROM_EMAIL}}","toEmail":"={{$env.RECRUITING_TEAM_EMAIL}}","subject":"=New application: {{$json.body.job.title}}","emailFormat":"text","text":"=New candidate application received.\n\nCandidate: {{$json.body.candidateName}} ({{$json.body.candidateEmail}})\nRole: {{$json.body.job.title}} — {{$json.body.job.department}}\nApplication ID: {{$json.body.applicationId}}\n\nSign in to the ATS to review the CV securely.","options":{}},"id":"3","name":"Email recruiting team","type":"n8n-nodes-base.emailSend","typeVersion":2.1,"position":[0,-80],"credentials":{"smtp":{"id":"SET_IN_N8N","name":"Recruiting SMTP"}}},
     {"parameters":{"respondWith":"json","responseBody":"={\"ok\":true}","options":{}},"id":"4","name":"Accepted","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.1,"position":[240,-80]},

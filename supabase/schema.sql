@@ -34,8 +34,8 @@ create or replace function private.current_app_role()
 returns public.app_role language sql stable security definer set search_path=''
 as $$ select p.role from public.profiles p where p.id = (select auth.uid()) $$;
 revoke all on function private.current_app_role() from public, anon;
-grant usage on schema private to authenticated;
-grant execute on function private.current_app_role() to authenticated;
+grant usage on schema private to anon, authenticated;
+grant execute on function private.current_app_role() to anon, authenticated;
 create or replace function public.create_candidate_profile()
 returns trigger language plpgsql security definer set search_path=''
 as $$ begin
@@ -72,9 +72,11 @@ create policy "candidate and assigned staff read CVs" on storage.objects for sel
 create policy "candidate replaces own CV" on storage.objects for update to authenticated using(bucket_id='candidate-cvs' and (storage.foldername(name))[1]=(select auth.uid())::text) with check(bucket_id='candidate-cvs' and (storage.foldername(name))[1]=(select auth.uid())::text);
 create policy "admin deletes CVs" on storage.objects for delete to authenticated using(bucket_id='candidate-cvs' and (select private.current_app_role())='admin');
 -- Seed initial jobs. Replace/edit these from the admin dashboard or SQL Editor.
-insert into public.jobs(title,department,location,type,description) values
+insert into public.jobs(title,department,location,type,description)
+select v.title,v.department,v.location,v.type,v.description from (values
 ('Frontend Developer','Engineering','Nowshera · Hybrid','Full-time','Build thoughtful digital experiences with a collaborative product team.'),
 ('People Operations Associate','People','Nowshera · On-site','Full-time','Help our teams do their best work through welcoming, organized operations.'),
 ('Product Designer','Design','Remote · Pakistan','Contract','Turn complex workflows into clear and useful product experiences.'),
 ('Customer Success Specialist','Operations','Nowshera · Hybrid','Full-time','Partner with customers and make every interaction feel effortless.')
-on conflict do nothing;
+) as v(title,department,location,type,description)
+where not exists(select 1 from public.jobs j where j.title=v.title);
